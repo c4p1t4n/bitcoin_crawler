@@ -68,18 +68,13 @@ def get_price_variations(driver) -> list:
     """
 
     table = get_table_of_prices(driver)
-    soup = BeautifulSoup(table.get_attribute('innerHTML'), 'html.parser')
-    print("---------")
     variation_last_hour = get_price_variation_last_hour(table)
 
     print(variation_last_hour)
-    # driver.close()
+    driver.close()
     return [variation_last_hour]
 
-
-firefox = get_driver()
-
-
 def lambda_handler(event,context):
+    firefox = get_driver()
     get_price_variations(firefox)
     
