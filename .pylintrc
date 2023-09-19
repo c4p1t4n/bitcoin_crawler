@@ -1,0 +1,8 @@
+[MESSAGES CONTROL]
+disable=\
+    unused-import,
+    missing-module-docstring,
+    no-value-for-parameter,
+    unused-argument,
+    bad-whitespace,
+    bad-continuation
