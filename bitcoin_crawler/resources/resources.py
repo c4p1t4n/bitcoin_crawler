@@ -24,7 +24,6 @@ def template_lambda(
     lambda_name: str,
     code_path: str,
     id_name: str,
-    name: str,
     minutes: int
 ) -> _lambda.Function:
     """
@@ -79,7 +78,7 @@ def template_policy(scope: Construct, id_name: str, statements: list) -> iam.Pol
     Args:
         scope: self
         id_name: policy_test
-        statements: [ ]
+        statements: [iam.PolicyStatement(args)] or template_iam_principal(args)]
     """
     return iam.Policy(
         scope=scope,
@@ -90,7 +89,11 @@ def template_policy(scope: Construct, id_name: str, statements: list) -> iam.Pol
 
 def template_iam_principal(actions: list, resources: list, principals: list) -> iam.PolicyStatement:
     """
-
+        Return a Policy statement
+    Args:
+        actions: permissions list example = ['s3:PutObject']
+        resources: "arn:s3//example"
+        
     """
     return iam.PolicyStatement(
         effect=iam.Effect.ALLOW,
