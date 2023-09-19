@@ -1,25 +1,13 @@
-"""Module to create a env for dev in aws using local enviroments"""
 import os
 import aws_cdk as cdk
 from bitcoin_crawler.bitcoin_crawler_stack import BitcoinCrawlerStackProd
-# ,BitcoinCrawlerStackDev
 
-
-app = cdk.App()
+APP = cdk.App()
 os.environ['STAGE'] = 'prod'
-stage = os.getenv('STAGE')
-env = cdk.Environment(account='288474932338', region='us-east-1')
-if stage=='prod':
-    stack = BitcoinCrawlerStackProd(app, 'bitcoin-crawler-prod', env=env)
-# else:
-#     stack = BitcoinCrawlerStackProd(app,'bitcoin-crawler-dev', env=env)
+STAGE = os.getenv('STAGE')
+ENV = cdk.Environment(account='288474932338', region='us-east-1')
+if STAGE=='prod':
+    STACK = BitcoinCrawlerStackProd(APP, 'bitcoin-crawler-prod', env=ENV)
 
-
-
-
-cdk.Tags.of(stack).add('PROJECT', 'bitcoin_crawler')
-
-
-
-
-app.synth()
+cdk.Tags.of(STACK).add('PROJECT', 'bitcoin_crawler')
+APP.synth()
