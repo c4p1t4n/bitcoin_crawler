@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "bitcoin-crawler"
+version = "0.1.0"
+description = "web scraper that get the value of bitcoin"
+authors = ["leo.oliveira <leoigornunes@protonmail.com>"]
+readme = "README.md"
+packages = [{include = "bitcoin_crawler"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+selenium = "^4.12.0"
+aws-cdk-lib = "^2.96.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
