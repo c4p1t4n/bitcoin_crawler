@@ -23,6 +23,8 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         pylint --rcfile=.pylintrc $(git ls-files '*.py') > pylint_output.txt || true
+      with:
+        args: pylint --rcfile=.pylintrc
     - name: analyzing output
       run: cat pylint_output.txt
     - name: Analysing the code with pylint
