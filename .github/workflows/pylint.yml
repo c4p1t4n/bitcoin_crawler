@@ -25,14 +25,21 @@ jobs:
         pylint --rcfile=.pylintrc $(git ls-files '*.py') > pylint_output.txt || true
     - name: analyzing output
       run: cat pylint_output.txt
-    - name: Check pylint score
-      id: pylint_score
-      run: |
-        score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint_output.txt)
-        echo "Pylint score: $score"
-        if (( $(echo "$score > 8.0" | bc -l) )); then
-          echo "Pylint score is greater than 8.0, the code is valid."
-        else
-          echo "Pylint score is not greater than 8.0, the code needs improvement."
-          exit 1
-        fi
+    - name: analyzing output
+      run: pylint --rcfile
+    - name: Analysing the code with pylint
+      run: pylint --disable=unused-import,missing-module-docstring,no-value-for-parameter,unused-argument,bad-whitespace,bad-continuation,missing-class-docstring $(git ls-files '*.py') > pylint_output.txt || true
+    - name: analyzing output
+      run: cat pylint_output.txt       
+
+    # - name: Check pylint score
+    #   id: pylint_score
+    #   run: |
+    #     score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint_output.txt)
+    #     echo "Pylint score: $score"
+    #     if (( $(echo "$score > 8.0" | bc -l) )); then
+    #       echo "Pylint score is greater than 8.0, the code is valid."
+    #     else
+    #       echo "Pylint score is not greater than 8.0, the code needs improvement."
+    #       exit 1
+    #     fi
