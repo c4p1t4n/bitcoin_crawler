@@ -20,9 +20,7 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint --disable=\
-          unused-import,missing-module-docstring,no-value-for-parameter,unused-argument,\
-          bad-whitespace,bad-continuation,missing-class-docstring,unused-import $(git ls-files '*.py') > pylint_output.txt || true
+        pylint --disable=unused-import,missing-module-docstring,no-value-for-parameter,unused-argument,bad-whitespace,bad-continuation,missing-class-docstring,unused-import $(git ls-files '*.py') > pylint_output.txt || true
     - name: Check pylint score
       id: pylint_score
       run: |
