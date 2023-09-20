@@ -21,6 +21,8 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         pylint --rcfile=.pylintrc $(git ls-files '*.py') > pylint_output.txt || true
+      env:
+        PYLINTRC: .pylintrc
     - name: Check pylint score
       id: pylint_score
       run: |
