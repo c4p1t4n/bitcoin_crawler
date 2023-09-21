@@ -11,35 +11,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint==2.4
-    - name: debug configuration 
-      run:  cat .pylintrc
+        pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint --rcfile=.pylintrc $(git ls-files '*.py') > pylint_output.txt || true
-      with:
-        args: pylint --rcfile=.pylintrc
-    - name: analyzing output
-      run: cat pylint_output.txt
-    - name: Analysing the code with pylint
-      run: pylint --disable=unused-import,missing-module-docstring,no-value-for-parameter,unused-argument,bad-whitespace,bad-continuation,missing-class-docstring $(git ls-files '*.py') > pylint_output.txt || true
-    - name: analyzing output
-      run: cat pylint_output.txt       
-
-    # - name: Check pylint score
-    #   id: pylint_score
-    #   run: |
-    #     score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint_output.txt)
-    #     echo "Pylint score: $score"
-    #     if (( $(echo "$score > 8.0" | bc -l) )); then
-    #       echo "Pylint score is greater than 8.0, the code is valid."
-    #     else
-    #       echo "Pylint score is not greater than 8.0, the code needs improvement."
-    #       exit 1
-    #     fi
+        pylint --disable=unused-import          $(git ls-files '*.py') -- --fail-under 2.0 -> pylint.txt
+    - name: debug pylint
+      run: |
+        cat pylint.txt
