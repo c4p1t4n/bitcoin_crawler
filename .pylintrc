@@ -1,2 +1,8 @@
 [MESSAGES CONTROL]
-disable=unused-import,missing-module-docstring,missing-class-docstring,import-error,no-value-for-parameter
+# Disable Errors useless to my context or don't work correctly
+disable=\
+    unused-import
+    ,missing-module-docstring
+    ,missing-class-docstring
+    ,import-error
+    ,no-value-for-parameter
