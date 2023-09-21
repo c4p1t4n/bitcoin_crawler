@@ -1,6 +1,6 @@
 [MESSAGES CONTROL]
 # Disable Errors useless to my context or don't work correctly
-disable=\
+disable=
     unused-import
     ,missing-module-docstring
     ,missing-class-docstring
