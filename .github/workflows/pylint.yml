@@ -20,4 +20,15 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint  $(git ls-files '*.py')
+        pylint  $(git ls-files '*.py') > pylint_output.txt || true
+    - name: Check pylint score
+      id: pylint_score
+      run: |
+        score=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' pylint_output.txt)
+        echo "Pylint score: $score"
+        if (( $(echo "$score > 8.0" | bc -l) )); then
+          echo "Pylint score is greater than 8.0, the code is valid."
+        else
+          echo "Pylint score is not greater than 8.0, the code needs improvement."
+          exit 1
+        fi
