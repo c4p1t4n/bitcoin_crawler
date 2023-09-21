@@ -75,6 +75,7 @@ def get_price_variations(driver) -> list:
     return [variation_last_hour]
 
 def lambda_handler(event,context):
+    # pylint: disable=unused-argument
     firefox = get_driver()
     get_price_variations(firefox)
     
