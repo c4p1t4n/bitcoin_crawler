@@ -20,7 +20,7 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint --disable=unused-import          $(git ls-files '*.py') -- --fail-under 2.0 -> pylint.txt
+        pylint --disable=unused-import  $(git ls-files '*.py')   -> pylint.txt
     - name: debug pylint
       run: |
         cat pylint.txt
