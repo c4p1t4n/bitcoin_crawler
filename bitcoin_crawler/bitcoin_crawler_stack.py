@@ -28,12 +28,7 @@ class BitcoinCrawlerStackProd(Stack):
             scope=self,
             id_name='policy_lambda_bitcoin_crawler',
             statements=[
-                # s3_read_write_stmt,
-                # cloudwatch_logs_stmt,
-                # sqs_statement,
-                s3_statement,
-                # role_lambda_bitcoin_crawler
-                # glue_statement
+                s3_statement
             ]
         )
 
