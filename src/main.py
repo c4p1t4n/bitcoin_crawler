@@ -1,7 +1,7 @@
 import time
-import awswrangler
+# import awswrangler
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from bs4 import BeautifulSoup
@@ -9,10 +9,14 @@ def get_driver() -> webdriver:
     """
     Return a webdriver
     """
-    options = Options()
-    options.add_argument("--headless=new")
-    driver = webdriver.Firefox(options=options)
-    return driver
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_prefs = {}
+    chrome_options.experimental_options["prefs"] = chrome_prefs
+    chrome_prefs["profile.default_content_settings"] = {"images": 2}
+    return webdriver.Chrome(options=chrome_options)
 def get_table_of_prices(driver):
     """
     Return the table with all cryptocurrency's
@@ -20,9 +24,7 @@ def get_table_of_prices(driver):
     driver.get("https://coinmarketcap.com/")
     time.sleep(5)
     div =  driver.find_element(By.CLASS_NAME,'sc-b28ea1c6-2')
-    table = div.find_element(By.CLASS_NAME,'sc-b28ea1c6-3')
-
-    return table
+    return div.find_element(By.CLASS_NAME,'sc-b28ea1c6-3')
 
 def get_bitcoin_price(driver) -> float:
     """
@@ -33,8 +35,7 @@ def get_bitcoin_price(driver) -> float:
 
     element = table.find_element(By.CLASS_NAME,'sc-a0353bbc-0')
 
-    price= float(element.text[1:])
-    driver.close()
+    price= float(element.text[1:].replace(',',''))
     return price
 
 def price_negative(price)-> bool:
@@ -71,11 +72,10 @@ def get_price_variations(driver) -> list:
     variation_last_hour = get_price_variation_last_hour(table)
 
     print(variation_last_hour)
-    driver.close()
     return [variation_last_hour]
 
-def lambda_handler(event,context):
-    # pylint: disable=unused-argument
-    firefox = get_driver()
-    get_price_variations(firefox)
-    
+
+firefox = get_driver()
+print(get_bitcoin_price(firefox))
+get_price_variations(firefox)
+# firefox.close()
