@@ -13,45 +13,12 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_sns_subscriptions as sns_subscriptions,
     aws_glue as glue,
+    aws_ecs as ecs
 
 )
 
 
-def template_lambda(
-    scope: Construct,
-    iam_role: iam,
-    lambda_handler: str,
-    lambda_name: str,
-    code_path: str,
-    id_name: str,
-    minutes: int
-) -> _lambda.Function:
-    """
-    Return a lambda Function with 1GB of memory 
-    """
-    return _lambda.Function(
-        scope=scope,
-        memory_size=1024,
-        role=iam_role,
-        timeout=Duration.minutes(minutes),
-        handler=lambda_handler,
-        runtime=_lambda.Runtime.PYTHON_3_8,
-        id=id_name,
-        function_name=lambda_name,
-        code=_lambda.Code.from_asset(code_path),
-        layers=[
-            # _lambda.LayerVersion.from_layer_version_arn(
-            #     scope=scope,
-            #     id=f'awswrangler3_{name}-{STAGE}',
-            #     layer_version_arn=f'arn:aws:lambda:{REGION}:{ACCOUNT}:layer:awswrangler3:3'
-            # ),
-            # _lambda.LayerVersion.from_layer_version_arn(
-            #     scope=scope,
-            #     id=f'polars{name}-{STAGE}',
-            #     layer_version_arn=f'arn:aws:lambda:us-east-1:288474932338:layer:polars:2'
-            # )
-        ],
-    )
+
 
 
 def template_iam(actions: list, resources: list) -> iam.PolicyStatement:
@@ -103,46 +70,27 @@ def template_iam_principal(actions: list, resources: list, principals: list) -> 
     )
 
 
-def template_role_lambda(scope: Construct, id_name: str, role_name: str) -> iam.Policy:
+def template_role(scope: Construct, id_name: str, role_name: str,service_name:str) -> iam.Role:
     """
         Return a Service Principal for use lambda
         Args: 
             id_name: id of role
             role_name: name of the role in AWS
+            service_name: service aws that will assume the Role
     """
     return iam.Role(
             scope=scope,
             id=id_name,
-            assumed_by=iam.ServicePrincipal('lambda.amazonaws.com'),
+            assumed_by=iam.ServicePrincipal(f'{service_name}.amazonaws.com'),
             role_name=role_name
         )
 
 
-
-def template_topic_sns(scope: Construct, id_name: str, topic_name: str) -> sns.Topic:
-    sns_topic = sns.Topic(
-        scope=scope,
-        id=id_name,
-        topic_name=topic_name
-    )
-    return sns_topic
-
-
-def add_subscription_sqs(scope: Construct, sns_topic: sns.Topic, sqs_queue: sqs.Queue):
-    topic_policy = sns.TopicPolicy(scope, "TopicPolicy",
-                                   topics=[sns_topic]
-                                   )
-    topic_policy.document.add_statements(iam.PolicyStatement(
-        actions=["sns:Publish"],
-        principals=[iam.ServicePrincipal("sqs.amazonaws.com")],
-        resources=[sns_topic.topic_arn]
-    )
-    )
-
-    sns_topic.add_subscription(sns_subscriptions.SqsSubscription(sqs_queue))
-
-
 def template_event_bridge(scope: Construct, id_name: str, duration: Duration, _lambda: _lambda.Function):
+    """
+    
+    """
+
     event = events.Rule(
         scope=scope,
         id=id_name,
