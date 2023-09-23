@@ -12,9 +12,6 @@ from aws_cdk import (
     aws_events as events,
     aws_lambda as _lambda,
     aws_sns_subscriptions as sns_subscriptions,
-    aws_glue as glue,
-    aws_ecs as ecs
-
 )
 
 
@@ -86,7 +83,11 @@ def template_role(scope: Construct, id_name: str, role_name: str,service_name:st
         )
 
 
-def template_event_bridge(scope: Construct, id_name: str, duration: Duration, _lambda: _lambda.Function):
+def template_event_bridge(
+        scope: Construct
+        , id_name: str
+        , duration: Duration, 
+        _lambda: _lambda.Function):
     """
     
     """
