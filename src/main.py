@@ -1,9 +1,11 @@
 import time
-# import awswrangler
+import awswrangler as wr
+import polars as pl
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from datetime import datetime
 from bs4 import BeautifulSoup
 def get_driver() -> webdriver:
     """
@@ -28,7 +30,7 @@ def get_table_of_prices(driver):
 
 def get_bitcoin_price(driver) -> float:
     """
-    Returt the current price of bitcoin
+    Return the current price of bitcoin
     """
 
     table = get_table_of_prices(driver)
@@ -74,8 +76,43 @@ def get_price_variations(driver) -> list:
     print(variation_last_hour)
     return [variation_last_hour]
 
+def write_parquet(dataframe: pl.DataFrame, path: str) -> None:
+    """
+    Write a Pandas DataFrame to S3 in Parquet format in append mode.
 
-firefox = get_driver()
-print(get_bitcoin_price(firefox))
-get_price_variations(firefox)
-# firefox.close()
+    Args:
+        dataframe: The Polars DataFrame to write.
+        path: The S3 path to write the DataFrame to.
+    Returns:
+        None.
+    """
+
+    wr.s3.to_parquet(dataframe.to_pandas(), path, dataset=True, mode='append')
+
+def create_dataframe(bitcoin_price,variation_last_hour):
+    """
+    Create a Polars dataframe with columns bitcoin_price,variation_last_hour and datetime
+    Args:
+        bitcoin_price: the price of bitcoin in current_time
+        variation_last_hour: the variation of bitcoin price in last hour
+    Returns:
+        Polars DataFrame
+    """
+    data = [
+        pl.Series("bitcoin_price", [bitcoin_price],dtype=pl.Float32),
+        pl.Series("variation_last_hour", [variation_last_hour],dtype=pl.Float32),
+        pl.Series("datetime", [datetime.now()],dtype=pl.Datetime)
+    ]
+    return pl.DataFrame(data)
+
+if __name__ == '__main__':
+    PATH = 's3://bitcoin-crawler-7493/raw/'
+    chrome_driver = get_driver()
+    table = get_table_of_prices(chrome_driver)
+    variation_last_hour = get_price_variation_last_hour(table)
+    df = create_dataframe(
+        get_bitcoin_price(chrome_driver),
+        variation_last_hour
+    )
+    write_parquet(df,PATH)
+    chrome_driver.close() 
