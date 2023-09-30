@@ -2,11 +2,13 @@ from aws_cdk import (
     # Duration,
     Stack,
     aws_ecs as ecs,
-    aws_logs as logs
+    aws_logs as logs,
+    aws_ec2 as ec2
     # aws_sqs as sqs,
 )
 from constructs import Construct
 from bitcoin_crawler.resources.classes.task_definition import (TaskDefinition,TaskDefinitionArgs)
+from bitcoin_crawler.resources.classes.cluster import ClusterECS
 from bitcoin_crawler.resources.resources import (
     template_role,
     template_iam,
@@ -31,8 +33,7 @@ class BitcoinCrawlerStackProd(Stack):
                 "ecr:GetDownloadUrlForLayer",
                 "ecr:BatchGetImage",
             ],
-            resources=['*']    
-        )
+            resources=['*'])
 
         s3_statement = template_iam(
             actions=[
@@ -75,7 +76,7 @@ class BitcoinCrawlerStackProd(Stack):
 
 
         args = TaskDefinitionArgs(
-            id_class='bitcoin_crawler_dev',
+            id_class='bitcoin_crawler_task_definition_dev',
             stage='dev',
             vcpu=1,
             task_role=role_ecs_bitcoin_crawler,
@@ -84,5 +85,14 @@ class BitcoinCrawlerStackProd(Stack):
             project_name='bitcoin_crawler',
         )
 
-
         TaskDefinition(self,args)
+
+
+        default_vpc =ec2.Vpc.from_lookup(self, "VPC",
+            is_default=True
+        )
+        ClusterECS(
+            scope=self,
+            id_class='bitcoin_crawler_cluster_dev',
+            cluster_name='bitcoin_crawler_cluster_dev',
+            vpc=default_vpc)
