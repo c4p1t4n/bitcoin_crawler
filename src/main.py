@@ -1,4 +1,5 @@
 import time
+import logging
 import awswrangler as wr
 import polars as pl
 from selenium import webdriver
@@ -7,6 +8,12 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
 from bs4 import BeautifulSoup
+
+
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel('INFO')
+
 def get_driver() -> webdriver:
     """
     Return a webdriver
@@ -32,7 +39,7 @@ def get_bitcoin_price(driver) -> float:
     """
     Return the current price of bitcoin
     """
-
+    logger.info("get bitcoin_price")
     table = get_table_of_prices(driver)
 
     element = table.find_element(By.CLASS_NAME,'sc-a0353bbc-0')
@@ -107,12 +114,18 @@ def create_dataframe(bitcoin_price,variation_last_hour):
 
 if __name__ == '__main__':
     PATH = 's3://bitcoin-crawler-7493/raw/'
+    logger.info("get_drive")
     chrome_driver = get_driver()
+    logger.info("get table of prices")
     table = get_table_of_prices(chrome_driver)
+    logger.info("get_price_variation in last hour")
     variation_last_hour = get_price_variation_last_hour(table)
+    logger.info("create df")
     df = create_dataframe(
         get_bitcoin_price(chrome_driver),
         variation_last_hour
     )
+    logger.info(f"write in {PATH}")
     write_parquet(df,PATH)
-    chrome_driver.close() 
+    chrome_driver.close()
+    logger.info("Sucess")
