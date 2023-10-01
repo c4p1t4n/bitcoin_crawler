@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from constructs import Construct
+from aws_cdk.aws_events import Rule, Schedule
+from aws_cdk.aws_events_targets import EcsTask
 from aws_cdk import (
     Tags,
     Stack,
@@ -8,10 +10,12 @@ from aws_cdk import (
     aws_iam as iam,
     aws_sqs as sqs,
     aws_sns as sns,
+    aws_ecs as ecs,
     aws_events_targets as targets,
     aws_events as events,
     aws_lambda as _lambda,
     aws_sns_subscriptions as sns_subscriptions,
+    aws_ec2 as ec2
 )
 
 
@@ -22,7 +26,7 @@ def template_iam(actions: list, resources: list) -> iam.PolicyStatement:
     """
     Return a Policy Statement.
 
-    Parameters:
+    Args:
         actions (list): A list of permissions to be applied.
         resources (list): A list of resources to which the actions will apply.
     Returns:
@@ -81,21 +85,19 @@ def template_role(scope: Construct, id_name: str, role_name: str,service_name:st
             assumed_by=iam.ServicePrincipal(f'{service_name}.amazonaws.com'),
             role_name=role_name
         )
-
-
-def template_event_bridge(
-        scope: Construct
-        , id_name: str
-        , duration: Duration, 
-        _lambda: _lambda.Function):
+def template_cluster(scope:Construct,ecs_name,vpc:ec2.Vpc=None)->ecs.Cluster:
     """
-    
+    Return a ClusterECS
+        Args:
+            scope: self
+            ecs_name: the name of the cluster ecs
+            vpc: ec2.Vpc, note if vpc is none will use the default vpc
+    Returns:
+        ecs.Cluster
     """
+    if not vpc:
+        vpc =ec2.Vpc.from_lookup(scope, "VPC",
+            is_default=True
+        )
 
-    event = events.Rule(
-        scope=scope,
-        id=id_name,
-        schedule=events.Schedule.rate(duration),
-        targets=[targets.LambdaFunction(_lambda)]
-    )
-    return event
+    return ecs.Cluster(scope,f'{ecs_name}_cluster', vpc=vpc)
