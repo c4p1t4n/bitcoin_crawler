@@ -25,8 +25,8 @@ def get_table_of_prices(driver):
     """
     driver.get("https://coinmarketcap.com/")
     time.sleep(5)
-    div =  driver.find_element(By.CLASS_NAME,'sc-b28ea1c6-2')
-    return div.find_element(By.CLASS_NAME,'sc-b28ea1c6-3')
+    div =  driver.find_element(By.CLASS_NAME,'sc-66133f36-2')
+    return div.find_element(By.CLASS_NAME,'sc-66133f36-3')
 
 def get_bitcoin_price(driver) -> float:
     """
