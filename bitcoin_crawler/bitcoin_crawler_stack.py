@@ -1,18 +1,17 @@
 from aws_cdk import (
     # Duration,
     Stack,
-    aws_ecs as ecs,
-    aws_logs as logs,
-    aws_ec2 as ec2
-    # aws_sqs as sqs,
+    aws_ec2 as ec2,
+    aws_events as events,
+    aws_events_targets as targets,
 )
 from constructs import Construct
-from bitcoin_crawler.resources.classes.task_definition import (TaskDefinition,TaskDefinitionArgs)
-from bitcoin_crawler.resources.classes.cluster import ClusterECS
+from bitcoin_crawler.resources.classes.task_definition import (TaskDefinitionFargate,TaskDefinitionArgs)
 from bitcoin_crawler.resources.resources import (
     template_role,
     template_iam,
-    template_policy
+    template_policy,
+    template_cluster
 )
 
 
@@ -85,14 +84,23 @@ class BitcoinCrawlerStackProd(Stack):
             project_name='bitcoin_crawler',
         )
 
-        TaskDefinition(self,args)
+        task_definition = TaskDefinitionFargate(self,args)
 
 
-        default_vpc =ec2.Vpc.from_lookup(self, "VPC",
-            is_default=True
+        cluster= template_cluster(self,'bitcoin_crawler')
+
+        target=targets.EcsTask(
+            cluster=cluster,
+            task_definition=task_definition,
+            role=role_ecs_bitcoin_crawler,
+            assign_public_ip=True,
+            subnet_selection=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC)
         )
-        ClusterECS(
-            scope=self,
-            id_class='bitcoin_crawler_cluster_dev',
-            cluster_name='bitcoin_crawler_cluster_dev',
-            vpc=default_vpc)
+        rule = events.Rule(
+            self,
+            enabled=False,
+            id="trigger_bitcoin_crawler_ecs_ever_hour",
+            schedule=events.Schedule.cron(
+                minute="0",hour="*",month="*",week_day="*",year="*"),
+            targets=[target],
+        )
