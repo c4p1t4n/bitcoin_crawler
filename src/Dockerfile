@@ -14,6 +14,7 @@ ENV DISPLAY=:99
 
 RUN pip install --upgrade pip
 RUN pip install selenium
+RUN pip install polars
 
 RUN pip install bs4
 
