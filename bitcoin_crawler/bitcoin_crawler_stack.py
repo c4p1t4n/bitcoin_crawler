@@ -6,7 +6,9 @@ from aws_cdk import (
     aws_events_targets as targets,
 )
 from constructs import Construct
-from bitcoin_crawler.resources.classes.task_definition import (TaskDefinitionFargate,TaskDefinitionArgs)
+from bitcoin_crawler.resources.classes.task_definition import (
+    TaskDefinitionFargate,
+    TaskDefinitionArgs)
 from bitcoin_crawler.resources.resources import (
     template_role,
     template_iam,
@@ -66,7 +68,7 @@ class BitcoinCrawlerStackProd(Stack):
             scope=self,
             id_name='policy_ecs_bitcoin_crawler',
             statements=[
-                ecr_statement,
+                # ecr_statement,
                 s3_statement
             ]
         )
@@ -94,13 +96,14 @@ class BitcoinCrawlerStackProd(Stack):
             task_definition=task_definition,
             role=role_ecs_bitcoin_crawler,
             assign_public_ip=True,
-            subnet_selection=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC)
+            subnet_selection=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
         )
+
         rule = events.Rule(
             self,
-            enabled=False,
+            enabled=True,
             id="trigger_bitcoin_crawler_ecs_ever_hour",
             schedule=events.Schedule.cron(
-                minute="0",hour="*",month="*",week_day="*",year="*"),
+                minute="5",hour="*",month="*",week_day="*",year="*"),
             targets=[target],
         )
