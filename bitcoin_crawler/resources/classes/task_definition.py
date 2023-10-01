@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from aws_cdk import (
     aws_ecs as ecs,
     aws_logs as logs,
-    aws_iam as iam
+    aws_iam as iam,
     )
 from constructs import Construct
 
@@ -16,35 +16,28 @@ class TaskDefinitionArgs:
     execution_role: iam.Role
     project_name: str
 
-class TaskDefinition(Construct):
+class TaskDefinitionFargate(ecs.TaskDefinition):
 
     def __init__(self,scope:Construct,args: TaskDefinitionArgs,**kwargs) -> None:
-        super().__init__(scope, args.id_class,**kwargs)
-
         cpu = 1024*args.vcpu
         memory_mib = 1024*args.vcpu*2
-
-        task_definition = ecs.TaskDefinition(
-            self,
-            f'{args.project_name}_task_definition_{args.stage}', 
-            compatibility=ecs.Compatibility.FARGATE,
+        super().__init__(
+            scope, args.id_class,
             cpu=str(cpu),
             memory_mib=str(memory_mib),
-            task_role=args.task_role,
+            compatibility=ecs.Compatibility.FARGATE,
             execution_role=args.execution_role,
-            family=f'{args.project_name}_task_definition-{args.stage}',
-        )
+            task_role=args.task_role,
+            family=f'{args.project_name}_task_definition-{args.stage}'
+            ,**kwargs)
 
-        # Crie o grupo de logs
         log_group = logs.LogGroup(
             scope=self,
             id=f'/ecs/{args.project_name}_{args.stage}',
             log_group_name=f'/ecs/{args.project_name}_{args.stage}',
             retention=logs.RetentionDays.ONE_WEEK,
         )
-
-        # Adicione o contêiner à definição de tarefa
-        container = task_definition.add_container(
+        container = self.add_container(
             id=f'{args.project_name}_ecs-{args.stage}',
             image=ecs.ContainerImage.from_registry(args.ecr_image),
             memory_limit_mib=memory_mib,
